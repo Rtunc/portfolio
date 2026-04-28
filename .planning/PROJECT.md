@@ -1,8 +1,20 @@
 # Personal Portfolio — Data Engineer
 
+## Current Milestone: v1.0 Portfolio Launch
+
+**Goal:** Build and deploy a complete personal portfolio showcasing DE depth through a hybrid 3D experience — immersive Three.js hero + 3D projects section, styled HTML for About/Skills/Contact.
+
+**Target features:**
+- Three.js hero scene (data flow / particle network / graph nodes)
+- 3D floating project cards (3–4 curated projects)
+- About section with DE bio and experience
+- Skills section — DE stack + backend
+- Contact section — LinkedIn, GitHub, email links
+- Deployed to Vercel
+
 ## What This Is
 
-A senior Data Engineer's personal portfolio website built with React + Vite + Three.js, deployed on Vercel. The site is fully interactive in 3D — users navigate through sections via Three.js scenes with data visualization aesthetics (graph nodes, flowing data, network connections). It showcases real projects from the workspace covering ETL/pipelines, data warehouse/lakehouse, data infrastructure, backend/API work, and migration engineering. Target audience: recruiters and hiring managers.
+A senior Data Engineer's personal portfolio website built with React + Vite + React Three Fiber, deployed on Vercel. Uses a hybrid 3D approach — immersive Three.js hero and 3D project cards, with styled HTML sections for About, Skills, and Contact. Showcases 3–4 curated real projects from the workspace covering ETL/pipelines, data warehouse/lakehouse, and infra. Target audience: recruiters and hiring managers.
 
 ## Core Value
 
@@ -16,14 +28,14 @@ First impression that unmistakably communicates "senior DE with strong technical
 
 ### Active
 
-- [ ] Hero section with immersive Three.js 3D scene (data flow / graph nodes / particle network)
-- [ ] About section — 5+ years DE experience, skills overview
-- [ ] Projects section — showcase real projects from workspace (ETL, DW/lakehouse, infra, backend/API, migrations)
-- [ ] Skills section — DE stack (Spark, Airflow, dbt, Kafka, etc.) + backend capabilities
-- [ ] Each project card shows: stack used, scale/impact metrics, and links to real code
-- [ ] Interactive 3D navigation between sections (scroll or click triggers scene transitions)
-- [ ] Contact section
-- [ ] Deployed to Vercel with custom domain support
+- [ ] React + Vite project scaffold with React Three Fiber, TypeScript, Tailwind
+- [ ] Three.js hero scene — data flow / particle network / graph nodes aesthetic
+- [ ] About section — bio, 5+ years DE experience, career summary
+- [ ] 3D projects section — 3–4 curated project cards in 3D space (hover to reveal details)
+- [ ] Each project card shows: project name, stack, scale/impact metrics, link to repo
+- [ ] Skills section — DE stack (Spark, Airflow, dbt, Kafka, etc.) + backend
+- [ ] Contact section — LinkedIn, GitHub, email links (no form)
+- [ ] Deployed to Vercel
 
 ### Out of Scope
 
@@ -55,6 +67,9 @@ First impression that unmistakably communicates "senior DE with strong technical
 | React + Vite over Next.js | No SSR needed for static portfolio; faster dev iteration | — Pending |
 | Data viz aesthetic (not minimal/cyberpunk) | Directly communicates DE identity without words | — Pending |
 | Full-page 3D interactive (not hero only) | Differentiates from typical portfolio; showcases frontend depth | — Pending |
+| Hybrid 3D (hero + projects, not all sections) | Achievable v1 scope; hero + projects carry the visual impact | — Pending |
+| 3–4 curated projects over comprehensive list | Depth over breadth for recruiter audience; quality > quantity | — Pending |
+| Contact as links only (no form) | Zero backend complexity; LinkedIn/GitHub are better channels | — Pending |
 
 ---
-*Last updated: 2026-04-28 after initialization*
+*Last updated: 2026-04-28 after v1.0 milestone definition*
