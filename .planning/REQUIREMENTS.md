@@ -67,6 +67,7 @@
 | HERO-02 | Phase 2 | Pending |
 | HERO-03 | Phase 2 | Pending |
 | HERO-04 | Phase 2 | Pending |
+| EXP-03 | Phase 2 | Pending |
 | PROJ-01 | Phase 3 | Pending |
 | PROJ-02 | Phase 3 | Pending |
 | PROJ-03 | Phase 3 | Pending |
@@ -76,7 +77,6 @@
 | CONT-03 | Phase 4 | Pending |
 | EXP-01 | Phase 4 | Pending |
 | EXP-02 | Phase 5 | Pending |
-| EXP-03 | Phase 2 | Pending |
 
 **Coverage:**
 - v1 requirements: 16 total
@@ -85,4 +85,4 @@
 
 ---
 *Requirements defined: 2026-04-29*
-*Last updated: 2026-04-29 after initial definition*
+*Last updated: 2026-04-29 — traceability confirmed after roadmap creation*
