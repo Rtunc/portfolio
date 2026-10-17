@@ -78,7 +78,7 @@ function chartQuery(state: DemoState): CompiledQuery {
   const rank = aggExpression(first, aggFor(state, first));
   return {
     purpose: 'grid',
-    sql: `WITH filtered AS (SELECT * FROM fee_lines WHERE ${filter.sql}), ranked AS (SELECT ${seriesCol} AS series_key FROM filtered GROUP BY ${seriesCol} ORDER BY ${rank} DESC, ${seriesCol} ASC LIMIT 8) SELECT ${xCol}, ${seriesCol}, ${measures} FROM filtered INNER JOIN ranked ON filtered.${seriesCol} = ranked.series_key GROUP BY ${xCol}, ${seriesCol} ORDER BY ${xCol} ASC, ${seriesCol} ASC`,
+    sql: `WITH filtered AS (SELECT * FROM fee_lines WHERE ${filter.sql}), ranked AS (SELECT ${seriesCol} AS series_key FROM filtered GROUP BY ${seriesCol} ORDER BY ${rank} DESC, ${seriesCol} ASC) SELECT ${xCol}, ${seriesCol}, ${measures} FROM filtered INNER JOIN ranked ON filtered.${seriesCol} = ranked.series_key GROUP BY ${xCol}, ${seriesCol} ORDER BY ${xCol} ASC, ${seriesCol} ASC`,
     params: filter.params,
   };
 }

@@ -104,6 +104,7 @@ export function ReportDemo({
     const plan = compile(next);
     if (!plan.ok || !queueReady || !queue) {
       token.current += 1;
+      if (!plan.ok) setPhase('ready');
       return;
     }
     const current = ++token.current;

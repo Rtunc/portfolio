@@ -40,12 +40,15 @@ export function ReportVisual({ model }: { model: VisualModel }) {
           <table>
             <thead>
               <tr>
-                <th />
+                <th>{model.columnLabels.length === 0 ? model.measureLabels.join(' · ') : ''}</th>
                 {model.columnLabels.map((label) => (
                   <th key={label} scope="col">
-                    {label}
+                    {model.measureLabels.length > 1 ? `${label} (${model.measureLabels.join(' · ')})` : label}
                   </th>
                 ))}
+                {model.rowTotals ? (
+                  <th scope="col">Total</th>
+                ) : null}
               </tr>
             </thead>
             <tbody>
@@ -55,14 +58,18 @@ export function ReportVisual({ model }: { model: VisualModel }) {
                   {row.map((cell, cellIndex) => (
                     <td key={cellIndex}>{cell.every((value) => value == null) ? '' : cell.join(' · ')}</td>
                   ))}
+                  {model.rowTotals ? <td>{model.rowTotals[rowIndex]?.join(' · ') ?? ''}</td> : null}
                 </tr>
               ))}
-              {model.columnTotals ? (
+              {model.columnTotals || model.grand ? (
                 <tr>
                   <th scope="row">Total</th>
-                  {model.columnTotals.map((cell, index) => (
-                    <td key={index}>{cell.join(' · ')}</td>
-                  ))}
+                  {model.columnTotals ? (
+                    model.columnTotals.map((cell, index) => <td key={index}>{cell.join(' · ')}</td>)
+                  ) : (
+                    <td>{model.grand?.join(' · ')}</td>
+                  )}
+                  {model.rowTotals ? <td>{model.grand?.join(' · ') ?? ''}</td> : null}
                 </tr>
               ) : null}
             </tbody>
@@ -73,25 +80,33 @@ export function ReportVisual({ model }: { model: VisualModel }) {
       </div>
     );
   }
-  const height = 240;
+  const height = 280;
   const width = 640;
+  const colors = ['#1f4e5f', '#c46b3a', '#2f6f4e', '#8c3d55', '#3d5a80', '#b08900', '#5c4d7a', '#3f6f8c'];
+  const plotLeft = 8;
+  const plotRight = 620;
+  const plotTop = 12 + model.series.length * 16;
+  const plotBottom = 168;
+  const slot = model.xLabels.length === 0 ? plotRight - plotLeft : (plotRight - plotLeft) / model.xLabels.length;
+  const barWidth = Math.max(1, (slot - 4) / Math.max(1, model.series.length));
   const max = Math.max(1, ...model.series.flatMap((series) => series.values.map((value) => value ?? 0)));
+  const barHeight = (value: number | null) => ((value ?? 0) / max) * (plotBottom - plotTop);
   return (
     <div>
-      <svg data-testid="chart" role="img" viewBox={`0 0 ${width} ${height}`} width="100%" height="240">
+      <svg data-testid="chart" role="img" viewBox={`0 0 ${width} ${height}`} width="100%" height="280">
         {model.series.map((series, seriesIndex) => (
           <g key={series.name}>
-            <text x="8" y={18 + seriesIndex * 16}>
+            <text x="8" y={16 + seriesIndex * 16} fill={colors[seriesIndex % colors.length]}>
               {series.name}
             </text>
             {model.mark === 'line' ? (
               <polyline
                 fill="none"
-                stroke="currentColor"
+                stroke={colors[seriesIndex % colors.length]}
                 points={series.values
                   .map((value, index) => {
-                    const x = 120 + index * 28;
-                    const y = height - 36 - ((value ?? 0) / max) * 160;
+                    const x = plotLeft + index * slot + slot / 2;
+                    const y = plotBottom - barHeight(value);
                     return `${x},${y}`;
                   })
                   .join(' ')}
@@ -100,20 +115,25 @@ export function ReportVisual({ model }: { model: VisualModel }) {
               series.values.map((value, index) => (
                 <rect
                   key={`${series.name}-${index}`}
-                  x={120 + index * 28 + seriesIndex * 6}
-                  y={height - 36 - ((value ?? 0) / max) * 160}
-                  width="8"
-                  height={((value ?? 0) / max) * 160}
+                  x={plotLeft + index * slot + 2 + seriesIndex * barWidth}
+                  y={plotBottom - barHeight(value)}
+                  width={barWidth}
+                  height={barHeight(value)}
+                  fill={colors[seriesIndex % colors.length]}
                 />
               ))
             )}
           </g>
         ))}
-        {model.xLabels.map((label, index) => (
-          <text key={label} x={112 + index * 28} y={height - 12}>
-            {label}
-          </text>
-        ))}
+        {model.xLabels.map((label, index) => {
+          const x = plotLeft + index * slot + 2;
+          const y = plotBottom + 14;
+          return (
+            <text key={label} x={x} y={y} fontSize="10" transform={`rotate(60 ${x} ${y})`}>
+              {label}
+            </text>
+          );
+        })}
       </svg>
       {model.caption ? <p role="status">{model.caption}</p> : null}
     </div>

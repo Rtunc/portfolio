@@ -16,7 +16,7 @@ describe('compile preset', () => {
     expect(query.sql).toContain('SUM(amount) AS m_amount_sum');
     expect(query.sql).toContain('fee_month');
     expect(query.sql).toContain('site');
-    expect(query.sql).toContain('LIMIT 8');
+    expect(query.sql).not.toContain('LIMIT');
     expect(query.sql).not.toContain('site IN');
     expect(query.params).toEqual(['2024-01-01', '2025-06-01']);
   });

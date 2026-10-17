@@ -172,6 +172,28 @@ describe('ReportDemo', () => {
     act(() => listener?.());
     expect(screen.getByRole('button', { name: 'Fields' })).toBeInTheDocument();
   });
+
+  it('replaces a failed query with guidance after the last field is removed', async () => {
+    const user = userEvent.setup();
+    window.matchMedia = () => ({
+      matches: false,
+      media: '',
+      onchange: null,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      dispatchEvent: () => false,
+    });
+    const query = vi.fn().mockRejectedValue(new Error('SELECT secret FROM fee_lines'));
+    render(<ReportDemo connect={async () => executor(query)} />);
+    expect(await screen.findByRole('alert')).toHaveTextContent("This view couldn't be calculated.");
+    await user.click(screen.getByRole('button', { name: 'Remove Month' }));
+    await user.click(screen.getByRole('button', { name: 'Remove Site' }));
+    await user.click(screen.getByRole('button', { name: 'Remove Amount' }));
+    expect(await screen.findByRole('status')).toHaveTextContent('Add a field to X.');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
 });
 
 describe('DemoErrorBoundary', () => {
