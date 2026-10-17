@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b",
-    "test": "vitest run"
+    "test": "vitest run",
+    "demo:data": "node tools/make_demo_fees.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
