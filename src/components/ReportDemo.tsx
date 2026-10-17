@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type DragEvent } from 'react';
 import { FIELDS, MONTH_MAX, MONTH_MIN, SITES, fieldById, isFieldId } from '../demo/catalog';
 import { compile } from '../demo/compile';
+import { openBrowserExecutor } from '../demo/browser-db';
 import { LoadError, createQueue, loadFeeLines, type SqlExecutor } from '../demo/engine';
 import { present } from '../demo/shape';
 import { addField, dropOnWell, preset, removeField, setAgg, setMonths, setSites, switchWidget } from '../demo/state';
@@ -15,10 +16,6 @@ const AGG_OPTIONS = [
   ['avg', 'Average'],
   ['count', 'Count'],
 ] as const;
-
-async function missingBrowserExecutor(): Promise<SqlExecutor> {
-  throw new LoadError('browser executor is not wired');
-}
 
 function wellsOf(state: DemoState): { id: WellId; label: string; fields: FieldId[] }[] {
   if (state.widget === 'table') return [{ id: 'tableColumns', label: 'Columns', fields: state.tableColumns }];
@@ -37,7 +34,7 @@ function wellsOf(state: DemoState): { id: WellId; label: string; fields: FieldId
 }
 
 export function ReportDemo({
-  connect = missingBrowserExecutor,
+  connect = openBrowserExecutor,
   initialState = preset(),
 }: {
   connect?: () => Promise<SqlExecutor>;
@@ -50,12 +47,19 @@ export function ReportDemo({
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [queryAttempt, setQueryAttempt] = useState(0);
   const [fieldsOpen, setFieldsOpen] = useState(false);
+  const [narrow, setNarrow] = useState(() => window.matchMedia('(max-width: 800px)').matches);
   const token = useRef(0);
   const queueRef = useRef<Queue | null>(null);
   const connectRef = useRef(connect);
   connectRef.current = connect;
-  const narrow = window.matchMedia('(max-width: 800px)').matches;
   const showFields = !narrow || fieldsOpen;
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 800px)');
+    const onChange = () => setNarrow(media.matches);
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
   const compiled = compile(state);
   const guidanceMessage = compiled.ok ? null : guidance(compiled.reason);
   const placed = new Set(wellsOf(state).flatMap((well) => well.fields));

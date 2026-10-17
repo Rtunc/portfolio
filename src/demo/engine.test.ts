@@ -5,11 +5,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { compile } from './compile';
 import {
   assertCsvHeader,
-  createNodeExecutor,
   createQueue,
   loadFeeLines,
   LoadError,
+  rowsFromTable,
 } from './engine';
+import { createNodeExecutor } from './node-db';
 import { preset } from './state';
 import type { QueryRow } from './types';
 
@@ -22,6 +23,44 @@ function deferred<T>() {
   });
   return { promise, resolve };
 }
+
+describe('rowsFromTable', () => {
+  it('turns a browser timestamp into a UTC date and leaves an amount numeric', () => {
+    const rows = rowsFromTable({
+      schema: {
+        fields: [
+          { name: 'fee_month', type: { toString: () => 'Timestamp(MILLISECOND)' } },
+          { name: 'm_amount_sum' },
+        ],
+      },
+      batches: [
+        {
+          numRows: 1,
+          getChildAt(index: number) {
+            return { get: () => (index === 0 ? 1704067200000 : 900) };
+          },
+        },
+      ],
+    });
+    expect(rows).toEqual([{ fee_month: '2024-01-01', m_amount_sum: 900 }]);
+  });
+
+  it('reads DuckDB-WASM Date32 values that are epoch milliseconds', () => {
+    const rows = rowsFromTable({
+      schema: { fields: [{ name: 'fee_month', type: { toString: () => 'Date32<DAY>' } }] },
+      batches: [{ numRows: 1, getChildAt: () => ({ get: () => 1704067200000 }) }],
+    });
+    expect(rows).toEqual([{ fee_month: '2024-01-01' }]);
+  });
+
+  it('reads an Arrow day count as a UTC date', () => {
+    const rows = rowsFromTable({
+      schema: { fields: [{ name: 'fee_month', type: { toString: () => 'Date32<DAY>' } }] },
+      batches: [{ numRows: 1, getChildAt: () => ({ get: () => 19723 }) }],
+    });
+    expect(rows).toEqual([{ fee_month: '2024-01-01' }]);
+  });
+});
 
 describe('queue', () => {
   it('drops a late token and does not start it after a newer token won', async () => {

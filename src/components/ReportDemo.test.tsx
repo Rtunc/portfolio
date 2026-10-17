@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DemoErrorBoundary } from './DemoErrorBoundary';
@@ -146,6 +146,31 @@ describe('ReportDemo', () => {
     await user.click(screen.getByRole('button', { name: 'Remove Site' }));
     await user.click(screen.getByRole('button', { name: 'Remove Amount' }));
     expect(await screen.findByRole('status')).toHaveTextContent('Add a field to X.');
+  });
+
+  it('shows Fields when the viewport becomes narrow', async () => {
+    let matches = false;
+    let listener: (() => void) | null = null;
+    window.matchMedia = () => ({
+      get matches() {
+        return matches;
+      },
+      media: '(max-width: 800px)',
+      onchange: null,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      addEventListener: (_type: string, next: EventListenerOrEventListenerObject) => {
+        if (typeof next === 'function') listener = () => next(new Event('change'));
+      },
+      removeEventListener: () => undefined,
+      dispatchEvent: () => false,
+    });
+    render(<ReportDemo connect={async () => executor(async () => [{ fee_month: '2024-01-01', site: 'Harbor', m_amount_sum: 1 }])} />);
+    await screen.findByTestId('chart');
+    expect(screen.queryByRole('button', { name: 'Fields' })).not.toBeInTheDocument();
+    matches = true;
+    act(() => listener?.());
+    expect(screen.getByRole('button', { name: 'Fields' })).toBeInTheDocument();
   });
 });
 
