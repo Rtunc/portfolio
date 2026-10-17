@@ -12,6 +12,7 @@
     "demo:data": "node tools/make_demo_fees.mjs"
   },
   "dependencies": {
+    "@duckdb/duckdb-wasm": "1.33.1-dev57.0",
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.17.14",
     "react": "^18.3.1",

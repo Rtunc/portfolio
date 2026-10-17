@@ -1,0 +1,7 @@
+learner_id,learner,site,room,programme,fee_type,status,fee_month,amount
+L0001,An Ash,Harbor,Maple,Weekday care,Tuition,Paid,2024-01-01,100
+L0001,An Ash,Harbor,Maple,Weekday care,Meals,Paid,2024-01-01,20
+L0002,Bo Brook,Harbor,Maple,After school,Tuition,Paid,2024-01-01,50
+L0003,Cai Cole,Mill,Maple,Weekday care,Tuition,Paid,2024-02-01,80
+L0001,An Ash,Harbor,Maple,Weekday care,Tuition,Paid,2024-02-01,100
+L0002,Bo Brook,Mill,Maple,After school,Meals,Open,2024-02-01,40
