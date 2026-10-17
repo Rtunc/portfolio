@@ -63,6 +63,7 @@ export type TableModel = {
 
 export type PivotModel = {
   kind: 'pivot';
+  rowLabels: string[];
   columnLabels: string[];
   measureLabels: string[];
   body: (string | null)[][][];
