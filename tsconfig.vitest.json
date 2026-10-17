@@ -5,6 +5,6 @@
     "types": ["vitest/globals"],
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "include": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test-setup.ts", "src/demo", "src/components", "src/data", "tools/make_demo_fees.d.ts"],
+  "include": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test-setup.ts", "src/demo", "src/components", "src/data", "tools/make_demo_fees.d.ts", "tools/make_demo_fees.d.mts"],
   "exclude": []
 }
