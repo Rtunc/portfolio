@@ -73,7 +73,7 @@ export function ReportDemo({
     (async () => {
       try {
         const executor = await connectRef.current();
-        const response = await fetch('/demo/fee_lines.csv');
+        const response = await fetch(`${import.meta.env.BASE_URL}demo/fee_lines.csv`);
         if (!response.ok) throw new LoadError('missing fee file');
         const csv = await response.text();
         const gate = new Promise<void>((resolve) => {
