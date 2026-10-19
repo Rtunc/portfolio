@@ -1,0 +1,9 @@
+{
+  "name": "Nguyen Thach Anh — Data platform engineer",
+  "short_name": "Thach Anh",
+  "description": "I own the Glue lakehouse platform: the shared writer, tenant-scoped jobs, quality checks, and the deploy path.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f3ee",
+  "theme_color": "#f6f3ee"
+}
