@@ -43,6 +43,7 @@ describe('ReportDemo', () => {
     const chart = await screen.findByTestId('chart');
     expect(within(chart).getByText('Harbor')).toBeInTheDocument();
     expect(screen.getByText('Synthetic. Not a client.')).toBeInTheDocument();
+    expect(screen.getByText('Where this number comes from')).toBeInTheDocument();
   });
 
   it('shows X guidance and does not query when the chart has no dimension', async () => {

@@ -7,6 +7,7 @@ import { present } from '../demo/shape';
 import { addField, dropOnWell, preset, removeField, setAgg, setMonths, setSites, switchWidget } from '../demo/state';
 import type { ChartMark, DemoState, FieldId, VisualModel, WellId } from '../demo/types';
 import { guidance } from '../demo/types';
+import { LineagePath } from './LineagePath';
 import { ReportVisual } from './ReportVisual';
 
 type Queue = ReturnType<typeof createQueue>;
@@ -412,6 +413,7 @@ export function ReportDemo({
           <div className="crv2-card">
             <h3>Fees</h3>
             <p className="crv2-note">Pick fields, filter, and read a table, a pivot, or a chart. The numbers are synthetic fees, queried in your browser.</p>
+            <LineagePath mode="report" />
             {unsupported ? <p className="crv2-note">{unsupported} is not in this demo.</p> : null}
             {visual}
           </div>

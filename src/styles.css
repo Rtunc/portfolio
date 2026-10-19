@@ -67,19 +67,73 @@ a {
   margin-top: 1rem;
 }
 
-.platform ol {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 1rem 0 0;
-  padding: 0;
-  list-style: none;
+.path-lead {
+  max-width: 42rem;
+  color: #3f3a34;
 }
 
-.platform li {
-  padding: 0.35rem 0.7rem;
-  border: 1px solid #d9d2c8;
-  border-radius: 999px;
+.flow svg {
+  display: block;
+  height: auto;
+  font-family: system-ui, sans-serif;
+}
+
+.flow-report {
+  margin: 8px 0 12px;
+  padding: 8px 8px 2px;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.flow-title {
+  margin: 0 0 4px;
+  color: #005b82;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.flow-live {
+  stroke-dasharray: 8 12;
+  animation: flow-live 2.2s linear infinite;
+}
+
+.flow-here {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: flow-here 2.2s ease-in-out infinite;
+}
+
+@keyframes flow-live {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+@keyframes flow-here {
+  50% {
+    stroke: #7fd0ea;
+    stroke-width: 6;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-live,
+  .flow-here {
+    animation: none;
+  }
 }
 
 #report {

@@ -9,9 +9,14 @@ describe('App', () => {
     expect(screen.getByText('Data platform engineer')).toBeInTheDocument();
     expect(screen.getByText(/I own the Glue lakehouse platform/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Try the report' })).toHaveAttribute('href', '#report');
-    expect(screen.getByRole('list', { name: 'Platform path' }).textContent).toBe(
-      'SourcesGlue jobsIcebergReports',
-    );
+    const path = screen.getByRole('list', { name: 'Platform path' });
+    expect(path).toHaveTextContent('Postgres');
+    expect(path).toHaveTextContent('CDC');
+    expect(path).toHaveTextContent('Raw');
+    expect(path).toHaveTextContent('Glue');
+    expect(path).toHaveTextContent('DWH');
+    expect(path).toHaveTextContent('Curated schema');
+    expect(screen.getByRole('img', { name: /Postgres to CDC to Raw to Glue/ })).toBeInTheDocument();
     expect(screen.getByText(/Publications, slots, and LSN stay consistent/)).toBeInTheDocument();
     expect(screen.getAllByText(/Postgres CDC into Iceberg/).length).toBeGreaterThan(0);
     expect(screen.getByText(/Staff reports read the lake/)).toBeInTheDocument();
