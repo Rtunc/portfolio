@@ -82,7 +82,7 @@ export function ReportVisual({ model }: { model: VisualModel }) {
   }
   const height = 280;
   const width = 640;
-  const colors = ['#1f4e5f', '#c46b3a', '#2f6f4e', '#8c3d55', '#3d5a80', '#b08900', '#5c4d7a', '#3f6f8c'];
+  const colors = ['#00b8ec', '#11b14b', '#f4811f', '#833cf0', '#ee4056', '#ffcb06', '#0288bf', '#a5cd39'];
   const plotLeft = 8;
   const plotRight = 620;
   const plotTop = 12 + model.series.length * 16;
@@ -129,7 +129,7 @@ export function ReportVisual({ model }: { model: VisualModel }) {
           const x = plotLeft + index * slot + 2;
           const y = plotBottom + 14;
           return (
-            <text key={label} x={x} y={y} fontSize="10" transform={`rotate(60 ${x} ${y})`}>
+            <text key={label} x={x} y={y} fontSize="10" fill="#6d6d6d" transform={`rotate(60 ${x} ${y})`}>
               {label}
             </text>
           );

@@ -96,10 +96,10 @@ describe('ReportDemo', () => {
     render(<ReportDemo connect={async () => executor(query)} />);
     await screen.findByTestId('chart');
     const calls = query.mock.calls.length;
-    expect(screen.queryByRole('button', { name: 'Site' })).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Fields' }));
-    expect(screen.getByRole('button', { name: 'Site' })).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Fields' }));
+    expect(screen.queryByRole('checkbox', { name: 'Site' })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Data' }));
+    expect(screen.getByRole('checkbox', { name: 'Site' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Data' }));
     expect(query.mock.calls.length).toBe(calls);
   });
 
@@ -118,9 +118,9 @@ describe('ReportDemo', () => {
     const query = vi.fn(async () => [{ fee_month: '2024-01-01', site: 'Harbor', m_amount_sum: 1 }]);
     render(<ReportDemo connect={async () => executor(query)} />);
     await screen.findByTestId('chart');
-    expect(screen.getByRole('button', { name: 'Site' })).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Pivot' }));
-    const amount = await screen.findByRole('button', { name: 'Amount' });
+    expect(screen.getByRole('checkbox', { name: 'Site' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Pivot Table' }));
+    const amount = await screen.findByRole('checkbox', { name: 'Amount' });
     const rows = screen.getByRole('list', { name: 'Rows' });
     fireEvent.dragStart(amount, { dataTransfer: { setData: vi.fn(), getData: () => 'amount' } });
     fireEvent.dragOver(rows);
@@ -167,10 +167,10 @@ describe('ReportDemo', () => {
     });
     render(<ReportDemo connect={async () => executor(async () => [{ fee_month: '2024-01-01', site: 'Harbor', m_amount_sum: 1 }])} />);
     await screen.findByTestId('chart');
-    expect(screen.queryByRole('button', { name: 'Fields' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Data' })).not.toBeInTheDocument();
     matches = true;
     act(() => listener?.());
-    expect(screen.getByRole('button', { name: 'Fields' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Data' })).toBeInTheDocument();
   });
 
   it('replaces a failed query with guidance after the last field is removed', async () => {
