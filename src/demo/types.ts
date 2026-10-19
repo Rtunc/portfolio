@@ -1,5 +1,21 @@
 export type WidgetType = 'table' | 'pivot' | 'chart';
-export type ChartMark = 'column' | 'line';
+export type ChartMark =
+  | 'column'
+  | 'column-stacked'
+  | 'column-stacked-100'
+  | 'column-line'
+  | 'bar'
+  | 'bar-stacked'
+  | 'bar-stacked-100'
+  | 'line'
+  | 'line-markers'
+  | 'line-stepped'
+  | 'area'
+  | 'area-stacked'
+  | 'area-stacked-100'
+  | 'area-markers'
+  | 'pie'
+  | 'donut';
 export type Agg = 'sum' | 'avg' | 'count' | 'count_distinct';
 export type FieldKind = 'dimension' | 'time' | 'measure';
 export type Reason = 'need-x' | 'need-y' | 'need-value' | 'need-column';

@@ -197,6 +197,26 @@ describe('ReportDemo', () => {
 });
 
 describe('DemoErrorBoundary', () => {
+  it('switches chart marks and aggregation from the field menu', async () => {
+    const user = userEvent.setup();
+    const query = vi.fn(async () => [{ fee_month: '2024-01-01', site: 'Harbor', m_amount_sum: 1 }]);
+    render(<ReportDemo connect={async () => executor(query)} />);
+    await screen.findByTestId('chart');
+    await user.click(screen.getByRole('button', { name: 'Stacked column' }));
+    expect(screen.getByRole('button', { name: 'Stacked column' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Clustered column' })).toHaveAttribute('aria-pressed', 'false');
+    const amount = screen.getByText('Sum of Amount').closest('li');
+    if (!amount) throw new Error('missing amount chip');
+    await user.click(within(amount).getByRole('button', { name: 'Field options' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Average' }));
+    expect(screen.getByText('Average of Amount')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Pie' }));
+    expect(screen.getByRole('button', { name: 'Pie' })).toHaveAttribute('aria-pressed', 'true');
+    expect(await screen.findByTestId('chart')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Scatter' }));
+    expect(screen.getByText('Scatter is not in this demo.')).toBeInTheDocument();
+  });
+
   it('hides a render error that contains SQL', () => {
     function Boom(): null {
       throw new Error('SELECT secret');
