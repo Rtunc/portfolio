@@ -23,22 +23,87 @@ describe('compile preset', () => {
 });
 
 describe('compile filters', () => {
-  it('adds a site predicate only when sites are selected', () => {
+  it('adds a site predicate only when the row is complete', () => {
     const open = compileOk({ ...preset(), widget: 'table', tableColumns: ['site', 'amount'], chartX: null, chartSeries: null, chartY: [] });
     expect(open[0].sql).not.toContain('site IN');
-    const closed = compileOk({ ...preset(), widget: 'table', tableColumns: ['amount'], chartX: null, chartSeries: null, chartY: [], sites: ["O'Wharf"] });
+    const closed = compileOk({
+      ...preset(),
+      widget: 'table',
+      tableColumns: ['amount'],
+      chartX: null,
+      chartSeries: null,
+      chartY: [],
+      filters: [...preset().filters, { field: 'site', operator: 'in', values: ["O'Wharf"] }],
+    });
     expect(closed[0].sql).toContain('site IN (?)');
     expect(closed[0].sql).not.toContain("O'Wharf");
     expect(closed[0].params).toEqual(['2024-01-01', '2025-06-01', "O'Wharf"]);
+    const partial = compileOk({
+      ...preset(),
+      filters: [...preset().filters, { field: 'site', operator: 'contains', values: [''] }],
+    });
+    expect(partial[0].sql).not.toContain('contains(site');
+    const harbor = compileOk({
+      ...preset(),
+      filters: [...preset().filters, { field: 'site', operator: 'contains', values: ['Harbor'] }],
+    });
+    expect(harbor[0].sql).toContain('contains(site, ?)');
+    expect(harbor[0].sql).not.toContain('Harbor');
+    expect(harbor[0].params).toContain('Harbor');
   });
 
-  it('swaps a reversed pair and replaces an illegal month with the full window', () => {
-    const swapped = compileOk({ ...preset(), monthStart: '2025-06', monthEnd: '2024-02' });
-    expect(swapped[0].params.slice(0, 2)).toEqual(['2024-02-01', '2025-06-01']);
-    const illegal = compileOk({ ...preset(), monthStart: '2020-01', monthEnd: '2024-02' });
-    expect(illegal[0].params.slice(0, 2)).toEqual(['2024-01-01', '2025-06-01']);
-    const junk = compileOk({ ...preset(), monthStart: 'March', monthEnd: '2024-02' });
-    expect(junk[0].params.slice(0, 2)).toEqual(['2024-01-01', '2025-06-01']);
+  it('swaps a reversed pair, keeps 2024-13, and replaces an illegal month with the full window', () => {
+    const swapped = compileOk({
+      ...preset(),
+      filters: [{ field: 'fee_month', operator: 'inDateRange', values: ['2025-06', '2024-02'] }],
+    });
+    expect(swapped[0].params).toEqual(['2024-02-01', '2025-06-01']);
+    const odd = compileOk({
+      ...preset(),
+      filters: [{ field: 'fee_month', operator: 'inDateRange', values: ['2024-13', '2025-06'] }],
+    });
+    expect(odd[0].params).toEqual(['2024-13-01', '2025-06-01']);
+    const illegal = compileOk({
+      ...preset(),
+      filters: [{ field: 'fee_month', operator: 'inDateRange', values: ['2020-01', '2024-02'] }],
+    });
+    expect(illegal[0].params).toEqual(['2024-01-01', '2025-06-01']);
+    const junk = compileOk({
+      ...preset(),
+      filters: [{ field: 'fee_month', operator: 'inDateRange', values: ['March', '2024-02'] }],
+    });
+    expect(junk[0].params).toEqual(['2024-01-01', '2025-06-01']);
+  });
+
+  it('queries every row when the list is empty and skips a value-less or column-less row', () => {
+    const all = compileOk({ ...preset(), filters: [] });
+    expect(all[0].sql).toContain('WHERE TRUE');
+    expect(all[0].params).toEqual([]);
+    const half = compileOk({
+      ...preset(),
+      filters: [{ field: 'fee_month', operator: 'inDateRange', values: ['2024-03', ''] }],
+    });
+    expect(half[0].sql).toContain('WHERE TRUE');
+    expect(half[0].params).toEqual([]);
+    const present = compileOk({
+      ...preset(),
+      filters: [{ field: 'site', operator: 'set', values: [] }],
+    });
+    expect(present[0].sql).toContain("(site IS NOT NULL AND site <> '')");
+    expect(present[0].params).toEqual([]);
+    const learners = compileOk({
+      ...preset(),
+      filters: [...preset().filters, { field: 'learners', operator: 'gt', values: ['3'] }],
+    });
+    expect(learners[0].params).toEqual(['2024-01-01', '2025-06-01']);
+    expect(learners[0].sql).not.toContain('CAST(? AS DOUBLE)');
+    const amount = compileOk({
+      ...preset(),
+      filters: [...preset().filters, { field: 'amount', operator: 'gt', values: ['10'] }],
+    });
+    expect(amount[0].sql).toContain('amount > CAST(? AS DOUBLE)');
+    expect(amount[0].params).toContain('10');
+    expect(amount[0].sql).not.toContain("'10'");
   });
 });
 

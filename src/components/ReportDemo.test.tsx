@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DemoErrorBoundary } from './DemoErrorBoundary';
@@ -44,6 +44,89 @@ describe('ReportDemo', () => {
     expect(within(chart).getByText('Harbor')).toBeInTheDocument();
     expect(screen.getByText('Synthetic. Not a client.')).toBeInTheDocument();
     expect(screen.getByText('Where this number comes from')).toBeInTheDocument();
+  });
+
+  it('marks each field with its data type and keeps the checkbox name', () => {
+    render(<ReportDemo connect={async () => executor(async () => [])} />);
+    const site = screen.getByRole('checkbox', { name: 'Site' });
+    const month = screen.getByRole('checkbox', { name: 'Month' });
+    const amount = screen.getByRole('checkbox', { name: 'Amount' });
+    expect(site.querySelector('svg')).toHaveAttribute('data-type', 'dimension');
+    expect(site.querySelector('text')).toHaveAttribute('fill', '#6d6d6d');
+    expect(month.querySelector('svg')).toHaveAttribute('data-type', 'time');
+    expect(month.querySelector('rect')).toHaveAttribute('stroke', '#C19C00');
+    expect(amount.querySelector('svg')).toHaveAttribute('data-type', 'measure');
+    expect(amount.querySelector('path')).toHaveAttribute('stroke', '#118DFF');
+    expect(screen.getByRole('button', { name: 'Fee lines' }).querySelector('svg')).toHaveAttribute('data-type', 'table');
+  });
+
+  it('filters with an operator that matches the field type', async () => {
+    const user = userEvent.setup();
+    const seen: string[] = [];
+    const query = vi.fn(async (sql: string) => {
+      seen.push(sql);
+      return [{ fee_month: '2024-01-01', site: 'Harbor', m_amount_sum: 1 }];
+    });
+    render(<ReportDemo connect={async () => executor(query)} />);
+    await screen.findByTestId('chart');
+    expect(screen.queryByRole('group', { name: 'Sites' })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Start month')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('End month')).not.toBeInTheDocument();
+    const operator = screen.getByRole('combobox', { name: 'Operator 1' });
+    expect(within(operator).getByRole('option', { name: /^Between$/ })).toBeInTheDocument();
+    expect(within(operator).queryByRole('option', { name: /^Contains$/ })).not.toBeInTheDocument();
+    expect(within(operator).queryByRole('option', { name: /^Greater than$/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Field 1' }).closest('li')?.querySelector('svg')).toHaveAttribute('data-type', 'time');
+    expect(screen.getByLabelText('From 1')).toHaveValue('2024-01');
+    expect(screen.getByLabelText('To 1')).toHaveValue('2025-06');
+    await user.click(screen.getByRole('button', { name: 'Add filter' }));
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Field 2' }), 'site');
+    const second = screen.getByRole('combobox', { name: 'Operator 2' });
+    expect(within(second).getByRole('option', { name: /^Contains$/ })).toBeInTheDocument();
+    expect(within(second).queryByRole('option', { name: /^Greater than$/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Field 2' }).closest('li')?.querySelector('svg')).toHaveAttribute('data-type', 'dimension');
+    await user.selectOptions(second, 'contains');
+    await user.type(screen.getByRole('textbox', { name: 'Value 2' }), 'Harbor');
+    await waitFor(() => expect(seen.join('\n')).toContain('contains(site, ?)'));
+    await user.click(screen.getByRole('button', { name: 'Remove filter 2' }));
+    await user.click(screen.getByRole('button', { name: 'Remove filter 1' }));
+    expect(screen.getByText("No filters yet — add one to narrow this widget's data.")).toBeInTheDocument();
+  });
+
+  it('pins a sample of the fee table and hides SQL when that sample fails', async () => {
+    const user = userEvent.setup();
+    const query = vi.fn(async (sql: string) => {
+      if (sql.includes('LIMIT 100')) {
+        return [{ fee_month: '2024-01-01', site: 'Harbor', room: 'A', programme: 'Care', fee_type: 'Standard', status: 'Open', learner: 'L1' }];
+      }
+      return [{ fee_month: '2024-01-01', site: 'Harbor', m_amount_sum: 1 }];
+    });
+    render(<ReportDemo connect={async () => executor(query)} />);
+    await screen.findByTestId('chart');
+    await user.click(screen.getByRole('button', { name: 'Preview' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Fee lines' });
+    expect(within(dialog).getByText('Harbor')).toBeInTheDocument();
+    expect(within(dialog).getByText('time')).toBeInTheDocument();
+    expect(within(dialog).getByText('1 sample rows')).toBeInTheDocument();
+    fireEvent.mouseLeave(screen.getByRole('button', { name: 'Preview' }));
+    fireEvent.mouseLeave(dialog);
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    expect(screen.getByRole('dialog', { name: 'Fee lines' })).toBeInTheDocument();
+    const calls = query.mock.calls.length;
+    await user.click(screen.getByRole('checkbox', { name: 'Room' }));
+    await waitFor(() => expect(query.mock.calls.length).toBeGreaterThan(calls));
+    expect(screen.getByRole('dialog', { name: 'Fee lines' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Preview' }));
+    expect(screen.queryByRole('dialog', { name: 'Fee lines' })).not.toBeInTheDocument();
+
+    query.mockImplementation(async (sql: string) => {
+      if (sql.includes('LIMIT 100')) throw new Error('SELECT secret FROM fee_lines');
+      return [{ fee_month: '2024-01-01', site: 'Harbor', m_amount_sum: 1 }];
+    });
+    await user.click(screen.getByRole('button', { name: 'Preview' }));
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent("This preview couldn't load.");
+    expect(alert.textContent ?? '').not.toContain('SELECT');
   });
 
   it('shows X guidance and does not query when the chart has no dimension', async () => {
@@ -194,6 +277,44 @@ describe('ReportDemo', () => {
     await user.click(screen.getByRole('button', { name: 'Remove Amount' }));
     expect(await screen.findByRole('status')).toHaveTextContent('Add a field to X.');
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+});
+
+describe('widget canvas', () => {
+  it('adds a widget, accepts a dropped chart, and drags the card on the grid', async () => {
+    const user = userEvent.setup();
+    const query = vi.fn(async () => [{ fee_month: '2024-01-01', site: 'Harbor', m_amount_sum: 1 }]);
+    render(<ReportDemo connect={async () => executor(query)} />);
+    await screen.findByTestId('chart');
+    await user.click(screen.getByRole('button', { name: 'Add Widget' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Data Table' }));
+    expect(screen.getByRole('heading', { name: 'Untitled table' })).toBeInTheDocument();
+    expect(screen.getByTestId('chart')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Fees by site and month' }).closest('article')).toHaveAttribute('data-grid-w', '12');
+
+    const transfer = {
+      setData: vi.fn(),
+      getData: (type: string) => (type === 'application/x-crv2-chart' ? 'line' : ''),
+    };
+    fireEvent.dragStart(screen.getByRole('button', { name: 'Line' }), { dataTransfer: transfer });
+    fireEvent.drop(screen.getByTestId('report-canvas'), { dataTransfer: transfer });
+    expect(screen.getByRole('heading', { name: 'Untitled chart' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Line' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('heading', { name: 'Fees by site and month' }).closest('article')).toHaveAttribute('data-grid-w', '6');
+    await waitFor(() => expect(screen.getAllByTestId('chart')).toHaveLength(2));
+
+    const handle = screen.getAllByRole('button', { name: 'Drag to move widget' })[0];
+    fireEvent.pointerDown(handle, { clientX: 0, clientY: 0 });
+    fireEvent.pointerMove(window, { clientX: 0, clientY: 200 });
+    fireEvent.pointerUp(window);
+    expect(handle.closest('article')).toHaveAttribute('data-grid-y', '2');
+
+    await user.click(screen.getByRole('button', { name: 'Add Widget' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Number card' }));
+    expect(screen.getByText('Number card is not in this demo.')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Actions for Fees by site and month' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Delete' }));
+    expect(screen.queryByRole('heading', { name: 'Fees by site and month' })).not.toBeInTheDocument();
   });
 });
 

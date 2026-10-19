@@ -1,5 +1,5 @@
 import { fieldById, type CatalogField } from './catalog';
-import { clampMonths } from './state';
+import { whereOfFilters } from './filters';
 import type { Agg, CompiledQuery, CompileResult, DemoState, FieldId, QueryPurpose } from './types';
 
 export function measureAlias(id: FieldId, agg: Agg): string {
@@ -29,14 +29,7 @@ function aggFor(state: DemoState, field: CatalogField): Agg {
 }
 
 function whereOf(state: DemoState): { sql: string; params: string[] } {
-  const [start, end] = clampMonths(state.monthStart, state.monthEnd);
-  const params = [`${start}-01`, `${end}-01`];
-  let sql = 'fee_month >= CAST(? AS DATE) AND fee_month <= CAST(? AS DATE)';
-  if (state.sites.length > 0) {
-    sql += ` AND site IN (${state.sites.map(() => '?').join(', ')})`;
-    params.push(...state.sites);
-  }
-  return { sql, params };
+  return whereOfFilters(state.filters);
 }
 
 function measureSelect(state: DemoState, id: FieldId): string {

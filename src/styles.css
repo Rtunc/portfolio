@@ -196,6 +196,188 @@ a {
   padding: 16px;
 }
 
+.crv2-canvas-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.crv2-add {
+  position: relative;
+  flex: none;
+}
+
+.crv2-add > button,
+.crv2-empty-state button {
+  border: 1px solid #005b82;
+  border-radius: 4px;
+  background: #fff;
+  color: #005b82;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.crv2-add-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 5;
+  min-width: 11rem;
+  padding: 4px 0;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.crv2-add-menu button {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  border: 0;
+  background: transparent;
+  color: #404040;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.crv2-add-menu button:hover {
+  background: #f0f0f0;
+}
+
+.crv2-grid {
+  position: relative;
+}
+
+.crv2-widget {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.crv2-widget.is-selected {
+  border-color: #005b82;
+}
+
+.crv2-widget-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.crv2-widget-head h3 {
+  margin: 0;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  color: #6d6d6d;
+  font-size: 14px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crv2-widget-handle,
+.crv2-widget-menu {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #6d6d6d;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.crv2-widget-handle:hover,
+.crv2-widget-menu:hover {
+  background: #f0f0f0;
+}
+
+.crv2-widget-handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+.crv2-widget-body {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+}
+
+.crv2-widget-actions {
+  top: 36px;
+  right: 12px;
+}
+
+.crv2-insert {
+  position: absolute;
+  top: 36px;
+  right: -12px;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 4px;
+  background: #005b82;
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.crv2-widget:hover .crv2-insert,
+.crv2-insert:focus-visible {
+  opacity: 1;
+}
+
+.crv2-widget-resize {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #005b82;
+  cursor: nwse-resize;
+  opacity: 0;
+}
+
+.crv2-widget:hover .crv2-widget-resize,
+.crv2-widget.is-selected .crv2-widget-resize,
+.crv2-widget-resize:focus-visible {
+  opacity: 1;
+}
+
+.crv2-empty-state {
+  display: flex;
+  min-height: 240px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px dashed #e6e6e6;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.crv2-empty-state strong {
+  font-size: 18px;
+}
+
 .crv2-card {
   min-height: 420px;
   padding: 16px;
@@ -313,6 +495,118 @@ a {
   font-size: 16px;
 }
 
+.crv2-source-row {
+  display: flex;
+  align-items: center;
+}
+
+.crv2-source-row .crv2-source {
+  flex: 1;
+  min-width: 0;
+}
+
+.crv2-preview-btn {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #6d6d6d;
+}
+
+.crv2-preview-btn:hover,
+.crv2-preview-btn[aria-pressed='true'] {
+  background: #fff;
+  color: #404040;
+}
+
+.crv2-preview {
+  position: fixed;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  width: min(520px, calc(100vw - 16px));
+  max-height: 420px;
+  overflow: hidden;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  background: #fff;
+  color: #404040;
+  box-shadow: 0 8px 24px rgba(28, 25, 21, 0.12);
+}
+
+.crv2-preview header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.crv2-preview header p {
+  margin: 0;
+}
+
+.crv2-preview header p:last-child {
+  color: #6d6d6d;
+  font-size: 12px;
+}
+
+.crv2-preview header button {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: #6d6d6d;
+  font-size: 16px;
+}
+
+.crv2-preview > p {
+  margin: 0;
+  padding: 8px 12px;
+  color: #6d6d6d;
+}
+
+.crv2-preview-scroll {
+  min-height: 0;
+  overflow: auto;
+}
+
+.crv2-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.crv2-preview th,
+.crv2-preview td {
+  max-width: 10rem;
+  padding: 4px 12px;
+  border-bottom: 1px solid #e6e6e6;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crv2-preview th {
+  position: sticky;
+  top: 0;
+  background: #f0f0f0;
+  font-weight: 600;
+}
+
+.crv2-preview th span {
+  display: block;
+}
+
+.crv2-preview th span:last-child {
+  color: #6d6d6d;
+  font-size: 12px;
+  font-weight: 400;
+}
+
 .crv2-source {
   display: flex;
   align-items: center;
@@ -349,9 +643,16 @@ a {
   background: #f0f0f0;
 }
 
+.crv2-type {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+}
+
 .crv2-box {
   width: 16px;
   height: 16px;
+  flex: 0 0 auto;
   border: 1px solid #6d6d6d;
   border-radius: 3px;
   background: #fff;
@@ -528,10 +829,82 @@ a {
   font-size: 14px;
 }
 
-.crv2-filters legend,
-.crv2-filters label {
-  display: block;
+.crv2-filters > p {
+  margin: 0;
+}
+
+.crv2-filters .crv2-empty {
   margin-top: 8px;
+}
+
+.crv2-filters > button {
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #005b82;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.crv2-filter-list {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.crv2-filter-row {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+}
+
+.crv2-filter-row select,
+.crv2-filter-row input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 4px 6px;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.crv2-filter-row > .crv2-type {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.crv2-filter-field {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.crv2-filter-row > button {
+  grid-column: 3;
+  grid-row: 1;
+  border: 0;
+  background: transparent;
+  color: #6d6d6d;
+  font: inherit;
+  cursor: pointer;
+}
+
+.crv2-filter-op,
+.crv2-filter-value,
+.crv2-filter-values {
+  grid-column: 1 / -1;
+}
+
+.crv2-filter-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
 }
 
 .crv2-empty {

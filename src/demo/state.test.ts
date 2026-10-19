@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
   addField,
+  addFilter,
   dropOnWell,
   preset,
   removeField,
+  removeFilter,
   setAgg,
-  setMonths,
-  setSites,
+  setFilterField,
+  setFilterOperator,
   switchWidget,
 } from './state';
 import type { DemoState } from './types';
@@ -31,24 +33,35 @@ describe('preset', () => {
       chartY: ['amount'],
       extras: [],
       measureAgg: { amount: 'sum' },
-      sites: [],
-      monthStart: '2024-01',
-      monthEnd: '2025-06',
+      filters: [{ field: 'fee_month', operator: 'inDateRange', values: ['2024-01', '2025-06'] }],
     });
   });
 });
 
 describe('filters', () => {
-  it('drops an unknown site and keeps an empty selection', () => {
-    expect(setSites(preset(), ["O'Wharf", 'Harbor']).sites).toEqual(['Harbor']);
-    expect(setSites(preset(), []).sites).toEqual([]);
+  it('resets the operator when the new field kind cannot keep it', () => {
+    expect(setFilterField(preset(), 0, 'site').filters[0]).toEqual({ field: 'site', operator: 'equals', values: [] });
+    const kept = setFilterField(
+      { ...preset(), filters: [{ field: 'site', operator: 'contains', values: ['Harbor'] }] },
+      0,
+      'room',
+    );
+    expect(kept.filters[0]).toEqual({ field: 'room', operator: 'contains', values: ['Harbor'] });
   });
 
-  it('swaps a reversed month pair', () => {
-    expect(setMonths(preset(), '2025-06', '2024-03')).toMatchObject({
-      monthStart: '2024-03',
-      monthEnd: '2025-06',
+  it('clears values when the operator needs a different number of slots', () => {
+    expect(setFilterOperator(preset(), 0, 'beforeDate').filters[0]).toEqual({
+      field: 'fee_month',
+      operator: 'beforeDate',
+      values: [],
     });
+    expect(setFilterOperator(preset(), 0, 'contains').filters[0].operator).toBe('inDateRange');
+  });
+
+  it('appends a blank row and drops one by index', () => {
+    const added = addFilter(preset());
+    expect(added.filters[1]).toEqual({ field: null, operator: 'equals', values: [] });
+    expect(removeFilter(added, 0).filters).toEqual([added.filters[1]]);
   });
 });
 

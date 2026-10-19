@@ -39,6 +39,32 @@ export type WellId =
   | 'chartSeries'
   | 'chartY';
 
+export type FilterOperator =
+  | 'equals'
+  | 'notEquals'
+  | 'in'
+  | 'notIn'
+  | 'set'
+  | 'notSet'
+  | 'gt'
+  | 'gte'
+  | 'lt'
+  | 'lte'
+  | 'contains'
+  | 'notContains'
+  | 'startsWith'
+  | 'endsWith'
+  | 'inDateRange'
+  | 'notInDateRange'
+  | 'beforeDate'
+  | 'afterDate';
+
+export type DemoFilter = {
+  field: FieldId | null;
+  operator: FilterOperator;
+  values: string[];
+};
+
 export type DemoState = {
   widget: WidgetType;
   chartMark: ChartMark;
@@ -51,9 +77,7 @@ export type DemoState = {
   chartY: FieldId[];
   extras: FieldId[];
   measureAgg: Partial<Record<FieldId, Agg>>;
-  sites: string[];
-  monthStart: string;
-  monthEnd: string;
+  filters: DemoFilter[];
 };
 
 export type QueryPurpose = 'grid' | 'column-totals' | 'row-totals' | 'grand-total';

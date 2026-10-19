@@ -48,6 +48,17 @@ export function createQueue(executor: Pick<SqlExecutor, 'query'>) {
     holdUntil(ready: Promise<void>) {
       gate = ready;
     },
+    sample(sql: string, params: string[]) {
+      const turn = tail.then(async () => {
+        await gate;
+        return executor.query(sql, params);
+      });
+      tail = turn.then(
+        () => undefined,
+        () => undefined,
+      );
+      return turn;
+    },
     run(token: number, queries: CompiledQuery[]) {
       latest = token;
       const turn = tail.then(async () => {
@@ -67,6 +78,23 @@ export function createQueue(executor: Pick<SqlExecutor, 'query'>) {
       return turn;
     },
   };
+}
+
+export const PREVIEW_COLUMNS = [
+  { name: 'fee_month', label: 'Month', type: 'time' },
+  { name: 'site', label: 'Site', type: 'string' },
+  { name: 'room', label: 'Room', type: 'string' },
+  { name: 'programme', label: 'Programme', type: 'string' },
+  { name: 'fee_type', label: 'Fee type', type: 'string' },
+  { name: 'status', label: 'Status', type: 'string' },
+  { name: 'learner', label: 'Learner', type: 'string' },
+] as const;
+
+export const PREVIEW_ROW_CAP = 100;
+
+export function previewSql(): string {
+  const columns = PREVIEW_COLUMNS.map((column) => column.name).join(', ');
+  return `SELECT ${columns} FROM fee_lines LIMIT ${PREVIEW_ROW_CAP}`;
 }
 
 export function assertCsvHeader(csvText: string): void {

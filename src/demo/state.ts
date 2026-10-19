@@ -1,13 +1,6 @@
-import { fieldById, MONTH_MAX, MONTH_MIN, SITES } from './catalog';
-import type { Agg, DemoState, FieldId, WellId, WidgetType } from './types';
-
-const MONTH_RE = /^\d{4}-\d{2}$/;
-
-export function clampMonths(start: string, end: string): [string, string] {
-  const ok = (value: string) => MONTH_RE.test(value) && value >= MONTH_MIN && value <= MONTH_MAX;
-  if (!ok(start) || !ok(end)) return [MONTH_MIN, MONTH_MAX];
-  return start <= end ? [start, end] : [end, start];
-}
+import { fieldById } from './catalog';
+import { operatorsForKind, valueSlots } from './filters';
+import type { Agg, DemoFilter, DemoState, FieldId, FilterOperator, WellId, WidgetType } from './types';
 
 export function preset(): DemoState {
   return {
@@ -22,24 +15,51 @@ export function preset(): DemoState {
     chartY: ['amount'],
     extras: [],
     measureAgg: { amount: 'sum' },
-    sites: [],
-    monthStart: MONTH_MIN,
-    monthEnd: MONTH_MAX,
+    filters: [{ field: 'fee_month', operator: 'inDateRange', values: ['2024-01', '2025-06'] }],
   };
 }
 
-export function normalizeFilters(state: DemoState): DemoState {
-  const [monthStart, monthEnd] = clampMonths(state.monthStart, state.monthEnd);
-  const allowed = new Set<string>(SITES);
-  return { ...state, monthStart, monthEnd, sites: state.sites.filter((site) => allowed.has(site)) };
+function replaceFilter(state: DemoState, index: number, filter: DemoFilter): DemoState {
+  if (index < 0 || index >= state.filters.length) return state;
+  const filters = state.filters.slice();
+  filters[index] = filter;
+  return { ...state, filters };
 }
 
-export function setSites(state: DemoState, sites: string[]): DemoState {
-  return normalizeFilters({ ...state, sites });
+export function addFilter(state: DemoState): DemoState {
+  return { ...state, filters: [...state.filters, { field: null, operator: 'equals', values: [] }] };
 }
 
-export function setMonths(state: DemoState, start: string, end: string): DemoState {
-  return normalizeFilters({ ...state, monthStart: start, monthEnd: end });
+export function removeFilter(state: DemoState, index: number): DemoState {
+  return { ...state, filters: state.filters.filter((_, item) => item !== index) };
+}
+
+export function setFilterField(state: DemoState, index: number, field: FieldId | null): DemoState {
+  const current = state.filters[index];
+  if (!current) return state;
+  if (!field) return replaceFilter(state, index, { field: null, operator: 'equals', values: [] });
+  const kind = fieldById(field)?.kind;
+  if (!kind) return state;
+  const legal = operatorsForKind(kind);
+  if (legal.includes(current.operator)) return replaceFilter(state, index, { ...current, field });
+  return replaceFilter(state, index, { field, operator: legal[0], values: [] });
+}
+
+export function setFilterOperator(state: DemoState, index: number, operator: FilterOperator): DemoState {
+  const current = state.filters[index];
+  if (!current?.field) return state;
+  const kind = fieldById(current.field)?.kind;
+  if (!kind || !operatorsForKind(kind).includes(operator)) return state;
+  const values = valueSlots(current.operator) === valueSlots(operator) ? current.values : [];
+  return replaceFilter(state, index, { ...current, operator, values });
+}
+
+export function setFilterValue(state: DemoState, index: number, slot: number, value: string): DemoState {
+  const current = state.filters[index];
+  if (!current || slot < 0) return state;
+  const values = current.values.slice();
+  values[slot] = value;
+  return replaceFilter(state, index, { ...current, values });
 }
 
 function isMeasure(id: FieldId): boolean {
@@ -127,7 +147,7 @@ function blank(state: DemoState, widget: WidgetType): DemoState {
 
 export function switchWidget(state: DemoState, widget: WidgetType): DemoState {
   if (state.widget === widget) return state;
-  const next = blank(normalizeFilters(state), widget);
+  const next = blank(state, widget);
   if (state.widget === 'chart') {
     const dimensions = [state.chartX, ...state.extras].filter((id): id is FieldId => id !== null);
     if (widget === 'table') {
